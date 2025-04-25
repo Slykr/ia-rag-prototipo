@@ -7,11 +7,10 @@ from langchain.embeddings import OpenAIEmbeddings
 from langchain.chains import RetrievalQA
 from langchain.llms import OpenAI
 from dotenv import load_dotenv
-import os
 
-load_dotenv()  # Carrega as variáveis do .env
-
-os.environ["OPENAI_API_KEY"] = os.getenv("OPENAI_API_KEY")
+# Carrega variáveis do .env
+load_dotenv()
+openai_api_key = os.getenv("OPENAI_API_KEY")
 
 st.title("💬 IA com seus documentos")
 uploaded_file = st.file_uploader("Faça upload de um documento", type=["pdf", "docx", "txt"])
@@ -22,22 +21,25 @@ if uploaded_file:
         f.write(uploaded_file.getbuffer())
 
     with st.spinner("Processando o documento..."):
+        # Carrega o conteúdo
         docs = load_documents(file_path)
+
+        # Divide em pedaços menores
         splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=100)
         chunks = splitter.split_documents(docs)
 
-        openai_api_key = os.getenv("OPENAI_API_KEY")
-
+        # Cria embeddings com segurança
         embeddings = OpenAIEmbeddings(openai_api_key=openai_api_key)
 
-        qa = RetrievalQA.from_chain_type(
-        llm=OpenAI(openai_api_key=openai_api_key),
-        retriever=retriever)
-        
+        # Gera base vetorial
         db = FAISS.from_documents(chunks, embeddings)
-
         retriever = db.as_retriever()
-        qa = RetrievalQA.from_chain_type(llm=OpenAI(), retriever=retriever)
+
+        # Usa o LLM com chave segura
+        qa = RetrievalQA.from_chain_type(
+            llm=OpenAI(openai_api_key=openai_api_key),
+            retriever=retriever
+        )
 
     st.success("Documento processado com sucesso!")
 
