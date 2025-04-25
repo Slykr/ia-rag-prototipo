@@ -26,7 +26,14 @@ if uploaded_file:
         splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=100)
         chunks = splitter.split_documents(docs)
 
-        embeddings = OpenAIEmbeddings()
+        openai_api_key = os.getenv("OPENAI_API_KEY")
+
+        embeddings = OpenAIEmbeddings(openai_api_key=openai_api_key)
+
+        qa = RetrievalQA.from_chain_type(
+        llm=OpenAI(openai_api_key=openai_api_key),
+        retriever=retriever)
+        
         db = FAISS.from_documents(chunks, embeddings)
 
         retriever = db.as_retriever()
