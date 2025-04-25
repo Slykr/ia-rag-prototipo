@@ -7,8 +7,11 @@ from langchain.embeddings import OpenAIEmbeddings
 from langchain.chains import RetrievalQA
 from langchain.llms import OpenAI
 from dotenv import load_dotenv
+import os
 
-load_dotenv()
+load_dotenv()  # Carrega as variáveis do .env
+
+os.environ["OPENAI_API_KEY"] = os.getenv("OPENAI_API_KEY")
 
 st.title("💬 IA com seus documentos")
 uploaded_file = st.file_uploader("Faça upload de um documento", type=["pdf", "docx", "txt"])
